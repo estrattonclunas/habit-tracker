@@ -51,7 +51,7 @@
       const [showAddHabit, setShowAddHabit] = useState(false);
       const [newHabit, setNewHabit] = useState({ name: '', emoji: '⭐' });
       const [calendarMonth, setCalendarMonth] = useState(new Date());
-      const pendingRef = React.useRef(new Set());
+      const [toggling, setToggling] = useState(false);
 
       useEffect(() => { localStorage.setItem('habits', JSON.stringify(habits)); }, [habits]);
       useEffect(() => { localStorage.setItem('habitLog', JSON.stringify(log)); }, [log]);
@@ -59,20 +59,18 @@
       const today = new Date();
       const todayKey = getDateKey(today);
 
-      const toggleHabit = (habitId, dateKey = todayKey) => {
-        const key = `${habitId}-${dateKey}`;
-        if (pendingRef.current.has(key)) return;
-        pendingRef.current.add(key);
+      const toggleHabit = React.useCallback((habitId, dateKey = todayKey) => {
+        if (toggling) return;
+        setToggling(true);
         
-        setTimeout(() => {
-          setLog(prev => {
-            const dayLog = prev[dateKey] || [];
-            if (dayLog.includes(habitId)) return { ...prev, [dateKey]: dayLog.filter(id => id !== habitId) };
-            return { ...prev, [dateKey]: [...dayLog, habitId] };
-          });
-          pendingRef.current.delete(key);
-        }, 0);
-      };
+        setLog(prev => {
+          const dayLog = prev[dateKey] || [];
+          const newLog = { ...prev, [dateKey]: dayLog.includes(habitId) ? dayLog.filter(id => id !== habitId) : [...dayLog, habitId] };
+          setTimeout(() => setToggling(false), 50);
+          return newLog;
+        });
+      }, [toggling, todayKey]);
+
 
       const addHabit = () => {
         if (!newHabit.name.trim()) return;
