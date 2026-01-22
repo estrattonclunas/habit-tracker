@@ -153,7 +153,7 @@
                 {habits.map(habit=>{
                   const done=todayLog.includes(habit.id), streak=getStreak(habit.id);
                   return(
-                    <div key={habit.id} onClick={()=>toggleHabit(habit.id)} className={`bg-white rounded-xl p-4 flex items-center gap-3 cursor-pointer transition ${done?'ring-2 ring-blue-400':''}`}>
+                    <div key={habit.id} onClick={()=>toggleHabit(habit.id)} onDoubleClick={(e)=>e.preventDefault()} className={`bg-white rounded-xl p-4 flex items-center gap-3 cursor-pointer transition ${done?'ring-2 ring-blue-400':''}`}>
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xl ${done?'bg-blue-500':'bg-gray-100'}`}>
                         {done?<Icon name="check" className="w-5 h-5 text-white"/>:habit.emoji}
                       </div>
