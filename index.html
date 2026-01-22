@@ -51,6 +51,7 @@
       const [showAddHabit, setShowAddHabit] = useState(false);
       const [newHabit, setNewHabit] = useState({ name: '', emoji: '⭐' });
       const [calendarMonth, setCalendarMonth] = useState(new Date());
+      const pendingRef = React.useRef(new Set());
 
       useEffect(() => { localStorage.setItem('habits', JSON.stringify(habits)); }, [habits]);
       useEffect(() => { localStorage.setItem('habitLog', JSON.stringify(log)); }, [log]);
@@ -59,11 +60,18 @@
       const todayKey = getDateKey(today);
 
       const toggleHabit = (habitId, dateKey = todayKey) => {
-        setLog(prev => {
-          const dayLog = prev[dateKey] || [];
-          if (dayLog.includes(habitId)) return { ...prev, [dateKey]: dayLog.filter(id => id !== habitId) };
-          return { ...prev, [dateKey]: [...dayLog, habitId] };
-        });
+        const key = `${habitId}-${dateKey}`;
+        if (pendingRef.current.has(key)) return;
+        pendingRef.current.add(key);
+        
+        setTimeout(() => {
+          setLog(prev => {
+            const dayLog = prev[dateKey] || [];
+            if (dayLog.includes(habitId)) return { ...prev, [dateKey]: dayLog.filter(id => id !== habitId) };
+            return { ...prev, [dateKey]: [...dayLog, habitId] };
+          });
+          pendingRef.current.delete(key);
+        }, 0);
       };
 
       const addHabit = () => {
